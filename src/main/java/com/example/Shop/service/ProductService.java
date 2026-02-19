@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ProductService {
 
@@ -43,5 +45,17 @@ public class ProductService {
         existingProduct.setStock(product.getStock());
 
         return save(existingProduct);
+    }
+
+    public List<Product> findExpensiveProducts(Double price){
+        return reposity.findByPriceGreaterThan(price);
+    }
+
+    public List<Product> findLowStock(Integer stock){
+        return reposity.findLowStock(stock);
+    }
+
+    public List<Product> searchByName(String name){
+        return reposity.searchByNameNative(name);
     }
 }

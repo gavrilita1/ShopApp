@@ -8,19 +8,18 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Entity
-@Table(name = "products")
+@Table(name = "users")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Product {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private String description;
-    private Double price;
-    private Integer stock;
 
-    @ManyToMany(mappedBy = "products")
+    private String username;
+    private String email;
+
+    @OneToMany(mappedBy = "user")
     private List<Order> orders;
 }
