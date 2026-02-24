@@ -1,7 +1,8 @@
 package com.example.Shop.service;
 
+import com.example.Shop.dto.ProductDTO;
 import com.example.Shop.entity.Product;
-import com.example.Shop.repository.ProductReposity;
+import com.example.Shop.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
@@ -11,51 +12,81 @@ import java.util.List;
 @Service
 public class ProductService {
 
-    private final ProductReposity reposity;
+    private final ProductRepository repository;
 
     @Autowired
-    public ProductService(ProductReposity reposity) {
-        this.reposity = reposity;
+    public ProductService(ProductRepository reposity) {
+        this.repository = reposity;
     }
 
-    public Product save(Product product) {
-        return reposity.save(product);
+    private ProductDTO toDto(Product product){
+        return new ProductDTO(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getStock()
+        );
     }
 
-    public Iterable<Product> findAll() {
-        return reposity.findAll();
+    public ProductDTO save(ProductDTO productDto) {
+        Product product =  new Product(
+                null,
+                productDto.name(),
+                productDto.description(),
+                productDto.price(),
+                productDto.stock(),
+                null
+        );
+        return toDto(repository.save(product));
     }
 
-    public Product findById(Long id) throws ChangeSetPersister.NotFoundException {
-        return reposity.findById(id)
-                .orElseThrow(() -> new ChangeSetPersister.NotFoundException());
+    public List<ProductDTO> findAll() {
+        return repository.findAll().stream()
+                .map(this::toDto)
+//                .map(product -> toDto(product))
+                .toList();
+    }
+
+    public ProductDTO findById(Long id) throws ChangeSetPersister.NotFoundException {
+        return repository.findById(id).map(this::toDto)
+                .orElseThrow(() -> new RuntimeException("Product was not found"));
     }
 
     public void deleteById(Long id) {
-        reposity.deleteById(id);
+        repository.deleteById(id);
     }
 
-    public Product update(Long id, Product product) throws ChangeSetPersister.NotFoundException {
+    public ProductDTO update(Long id, ProductDTO productDTO) throws ChangeSetPersister.NotFoundException {
 
-        Product existingProduct = findById(id);
+        Product existingProduct = repository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
 
-        existingProduct.setName(product.getName());
-        existingProduct.setDescription(product.getDescription());
-        existingProduct.setPrice(product.getPrice());
-        existingProduct.setStock(product.getStock());
+        existingProduct.setName(productDTO.name());
+        existingProduct.setDescription(productDTO.description());
+        existingProduct.setPrice(productDTO.price());
+        existingProduct.setStock(productDTO.stock());
 
-        return save(existingProduct);
+        return toDto(repository.save(existingProduct));
     }
 
-    public List<Product> findExpensiveProducts(Double price){
-        return reposity.findByPriceGreaterThan(price);
+    public List<ProductDTO> findExpensiveProducts(Double price){
+        return repository.findByPriceGreaterThan(price)
+                .stream()
+                .map(this::toDto)
+                .toList();
     }
 
-    public List<Product> findLowStock(Integer stock){
-        return reposity.findLowStock(stock);
+    public List<ProductDTO> findLowStock(Integer stock){
+        return repository.findLowStock(stock)
+                .stream()
+                .map(this::toDto)
+                .toList();
     }
 
-    public List<Product> searchByName(String name){
-        return reposity.searchByNameNative(name);
+    public List<ProductDTO> searchByName(String name){
+        return repository.searchByNameNative(name)
+                .stream()
+                .map(this::toDto)
+                .toList();
     }
 }

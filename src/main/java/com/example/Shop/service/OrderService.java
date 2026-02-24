@@ -1,10 +1,12 @@
 package com.example.Shop.service;
 
+import com.example.Shop.dto.OrderDTO;
+import com.example.Shop.dto.OrderRequestDTO;
 import com.example.Shop.entity.Order;
 import com.example.Shop.entity.Product;
 import com.example.Shop.entity.User;
-import com.example.Shop.repository.OrderReposity;
-import com.example.Shop.repository.ProductReposity;
+import com.example.Shop.repository.OrderRepository;
+import com.example.Shop.repository.ProductRepository;
 import com.example.Shop.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,30 +19,41 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderService {
 
-    private OrderReposity orderReposity;
+    private OrderRepository orderRepository;
     private UserRepository userRepository;
-    private ProductReposity productReposity;
+    private ProductRepository productRepository;
 
     @Transactional
-    public Order createOrder(Long user_id, List<Long> product_ids){
-        User user = userRepository.findById(user_id).orElseThrow(RuntimeException::new);
-        List<Product> products =  productReposity.findAllById(product_ids);
+    public OrderDTO createOrder(OrderRequestDTO request){
+        User user = userRepository.findById(request.userId()).orElseThrow(RuntimeException::new);
+        List<Product> products =  productRepository.findAllById(request.productIds());
 
         Double total = products.stream()
                 .mapToDouble(Product::getPrice)
                 .sum();
 
-        Order order = new Order();
-        order.setUser(user);
-        order.setProducts(products);
-        order.setTotal(total);
-        order.setCreatedAt(new Date());
+       Order order = new Order(null, user, products, total, new Date());
+       Order savedOrder =  orderRepository.save(order);
 
-        return orderReposity.save(order);
+       return new OrderDTO(
+               savedOrder.getId(),
+               user.getUsername(),
+               products.stream().map(Product::getName).toList(),
+               total,
+               savedOrder.getCreatedAt()
+       );
     }
 
-    public List<Order> getAllOrders(){
-        return orderReposity.findAll();
+    public List<OrderDTO> getAllOrders(){
+        return orderRepository.findAll()
+                .stream()
+                .map(o -> new OrderDTO(
+                        o.getId(),
+                        o.getUser().getUsername(),
+                        o.getProducts().stream().map(Product::getName).toList(),
+                        o.getTotal(),
+                        o.getCreatedAt()
+                ))
+                .toList();
     }
-
 }

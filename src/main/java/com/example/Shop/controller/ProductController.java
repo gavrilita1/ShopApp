@@ -1,8 +1,8 @@
 package com.example.Shop.controller;
 
+import com.example.Shop.dto.ProductDTO;
 import com.example.Shop.entity.Product;
 import com.example.Shop.service.ProductService;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.web.bind.annotation.*;
@@ -16,22 +16,18 @@ public class ProductController {
 
     private final ProductService service;
 
-//    public ProductController(ProductService service) {
-//        this.service = service;
-//    }
-
     @PostMapping
-    public Product create(@RequestBody Product product){
-        return service.save(product);
+    public ProductDTO create(@RequestBody ProductDTO productDto){
+        return service.save(productDto);
     }
 
     @GetMapping
-    public Iterable<Product> findAll(){
+    public List<ProductDTO> findAll(){
         return service.findAll();
     }
 
     @GetMapping("/{id}")
-    public Product findById(@PathVariable Long id) throws ChangeSetPersister.NotFoundException {
+    public ProductDTO findById(@PathVariable Long id) throws ChangeSetPersister.NotFoundException {
         return service.findById(id);
     }
 
@@ -41,22 +37,22 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public Product updateProduct(@PathVariable Long id, @RequestBody Product product) throws ChangeSetPersister.NotFoundException {
-        return service.update(id, product);
+    public ProductDTO updateProduct(@PathVariable Long id, @RequestBody ProductDTO productDTO) throws ChangeSetPersister.NotFoundException {
+        return service.update(id, productDTO);
     }
 
     @GetMapping("/expensive/{price}")
-    public List<Product> findExpensive(@PathVariable Double price){
+    public List<ProductDTO> findExpensive(@PathVariable Double price){
         return service.findExpensiveProducts(price);
     }
 
     @GetMapping("/low-stock/{stock}")
-    public List<Product> findLowStock(@PathVariable Integer stock){
+    public List<ProductDTO> findLowStock(@PathVariable Integer stock){
         return service.findLowStock(stock);
     }
 
     @GetMapping("/search/{name}")
-    public List<Product> searchByName(@PathVariable String name){
+    public List<ProductDTO> searchByName(@PathVariable String name){
         return service.searchByName(name);
     }
 }
