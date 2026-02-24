@@ -1,61 +1,90 @@
 package com.example.Shop.service;
 
+import com.example.Shop.dto.ProductDTO;
 import com.example.Shop.entity.Product;
-import com.example.Shop.repository.ProductReposity;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
+import com.example.Shop.repository.ProductRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ProductService {
 
-    private final ProductReposity reposity;
+    private final ProductRepository repository;
 
-    @Autowired
-    public ProductService(ProductReposity reposity) {
-        this.reposity = reposity;
+    public List<ProductDTO> findAll() {
+        return repository.findAll()
+                .stream()
+                .map(this::toDto)
+                .toList();
     }
 
-    public Product save(Product product) {
-        return reposity.save(product);
+    public ProductDTO findById(Long id) {
+        return repository.findById(id)
+                .map(this::toDto)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
     }
 
-    public Iterable<Product> findAll() {
-        return reposity.findAll();
-    }
+    public ProductDTO save(ProductDTO dto) {
+        Product product = new Product(
+                null,
+                dto.name(),
+                dto.description(),
+                dto.price(),
+                dto.stock(),
+                null
+        );
 
-    public Product findById(Long id) throws ChangeSetPersister.NotFoundException {
-        return reposity.findById(id)
-                .orElseThrow(() -> new ChangeSetPersister.NotFoundException());
+        return toDto(repository.save(product));
     }
 
     public void deleteById(Long id) {
-        reposity.deleteById(id);
+        repository.deleteById(id);
     }
 
-    public Product update(Long id, Product product) throws ChangeSetPersister.NotFoundException {
+    public ProductDTO update(Long id, ProductDTO dto) {
+        Product existing = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
 
-        Product existingProduct = findById(id);
+        existing.setName(dto.name());
+        existing.setDescription(dto.description());
+        existing.setPrice(dto.price());
+        existing.setStock(dto.stock());
 
-        existingProduct.setName(product.getName());
-        existingProduct.setDescription(product.getDescription());
-        existingProduct.setPrice(product.getPrice());
-        existingProduct.setStock(product.getStock());
-
-        return save(existingProduct);
+        return toDto(repository.save(existing));
     }
 
-    public List<Product> findExpensiveProducts(Double price){
-        return reposity.findByPriceGreaterThan(price);
+    public List<ProductDTO> findExpensiveProducts(Double price) {
+        return repository.findByPriceGreaterThan(price)
+                .stream()
+                .map(this::toDto)
+                .toList();
     }
 
-    public List<Product> findLowStock(Integer stock){
-        return reposity.findLowStock(stock);
+    public List<ProductDTO> findLowStock(Integer stock) {
+        return repository.findLowStock(stock)
+                .stream()
+                .map(this::toDto)
+                .toList();
     }
 
-    public List<Product> searchByName(String name){
-        return reposity.searchByNameNative(name);
+    public List<ProductDTO> searchByName(String name) {
+        return repository.searchByName(name)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    // ---- Mapper ----
+    private ProductDTO toDto(Product product) {
+        return new ProductDTO(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getStock()
+        );
     }
 }

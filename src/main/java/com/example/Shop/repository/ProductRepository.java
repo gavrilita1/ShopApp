@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ProductReposity extends JpaRepository<Product,Long> {
+public interface ProductRepository extends JpaRepository<Product,Long> {
 
     List<Product> findByPriceGreaterThan(Double price);
 
@@ -16,6 +16,6 @@ public interface ProductReposity extends JpaRepository<Product,Long> {
     List<Product> findLowStock(Integer stock);
 
     @Query(value = "SELECT * FROM products where name LIKE %:name%", nativeQuery = true)
-    List<Product> searchByNameNative(String name);
+    List<Product> searchByName(String name);
 
 }
