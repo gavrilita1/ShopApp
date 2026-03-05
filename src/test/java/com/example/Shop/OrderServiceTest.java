@@ -1,4 +1,4 @@
-package com.example.Shop.service;
+package com.example.Shop;
 
 import com.example.Shop.dto.OrderDTO;
 import com.example.Shop.dto.OrderRequestDTO;
@@ -8,6 +8,7 @@ import com.example.Shop.entity.User;
 import com.example.Shop.repository.OrderRepository;
 import com.example.Shop.repository.ProductRepository;
 import com.example.Shop.repository.UserRepository;
+import com.example.Shop.service.OrderService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
