@@ -20,13 +20,13 @@ import java.util.List;
 public class OrderService {
 
     // Repository used to persist and retrieve Order entities
-    private OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
 
     // Repository used to fetch the user that places the order
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     // Repository used to load products included in the order
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
     /**
      * Creates a new order.
